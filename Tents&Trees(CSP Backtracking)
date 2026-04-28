@@ -1,0 +1,38 @@
+from constraint import *
+
+
+def neighbors(tree, n):
+    neighbors = []
+    moves = [(1, 0), (0, 1), (0, -1), (-1, 0)]
+    for move in moves:
+        if 0 <= tree[0] + move[0] < n and 0 <= tree[1] + move[1] < n:
+            neighbors.append((tree[0] + move[0], tree[1] + move[1]))
+    return neighbors
+
+
+def not_neighbors(t1, t2):
+    return not (abs(t1[0] - t2[0]) in (0, 1) and abs(t1[1] - t2[1]) in (0, 1))
+
+
+if __name__ == '__main__':
+    problem = Problem(BacktrackingSolver())
+
+    n = int(input())
+    domain_trees = [tuple(map(int, input().split(" "))) for _ in range(n)]
+
+    trees = []
+    for i in range(len(domain_trees)):
+        tree = "tree" + str(i + 1)
+        trees.append(tree)
+        domain_shatori = [s for s in neighbors(domain_trees[i], n) if s not in domain_trees]
+        problem.addVariable(tree, domain_shatori)
+
+    problem.addConstraint(AllDifferentConstraint(), trees)
+
+    for i in range(len(trees)):
+        for j in range(i + 1, len(trees)):
+            problem.addConstraint(lambda t1, t2: not_neighbors(t1, t2), (trees[i], trees[j]))
+
+    solution = problem.getSolution()
+    for tree in trees:
+        print(f"{solution[tree][0]} {solution[tree][1]}")
